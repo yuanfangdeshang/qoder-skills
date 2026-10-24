@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__CHRONO_TITLE__</title>
+<style>
+  :root {
+    --bg: #0b1020;
+    --bg2: #0f1729;
+    --card: #111a2e;
+    --card2: #162239;
+    --line: #22304a;
+    --line2: #2d3d59;
+    --text: #e6edf7;
+    --muted: #8b9bb4;
+    --dim: #6b7a93;
+    --accent: #5aa9ff;
+    --good: #62d26f;
+    --bad: #ff6b8a;
+    --warn: #f5b84d;
+    --purple: #b18cff;
+    --radius: 14px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1100px 500px at 10% -10%, rgba(90,169,255,.14), transparent 60%),
+      radial-gradient(900px 400px at 95% 0%, rgba(177,140,255,.10), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    line-height: 1.6;
+  }
+  a { color: var(--accent); }
+  button, input, select { font: inherit; }
+  button { cursor: pointer; }
+  code { font-family: var(--mono); }
+  .wrap { width: min(1500px, calc(100% - 40px)); margin: 0 auto; }
+  .hero { padding: 46px 0 22px; border-bottom: 1px solid var(--line); }
+  .eyebrow { color: var(--accent); font-size: 12px; letter-spacing: .18em; text-transform: uppercase; margin-bottom: 10px; }
+  h1 { margin: 0 0 8px; font-size: clamp(28px, 4vw, 46px); line-height: 1.15; letter-spacing: -.02em; }
+  .subtitle { color: var(--muted); max-width: 980px; margin: 0 0 18px; }
+  .hero-meta { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--dim); font-size: 12px; }
+  .hero-meta code { color: var(--muted); }
+  .stats { display: grid; grid-template-columns: repeat(6, minmax(120px, 1fr)); gap: 10px; margin: 22px 0 0; }
+  .stat { background: linear-gradient(180deg, var(--card), var(--bg2)); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .stat b { display: block; font-size: 24px; line-height: 1.2; }
+  .stat span { color: var(--muted); font-size: 12px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 18px 0 0; position: sticky; top: 0; z-index: 20; background: rgba(11,16,32,.92); backdrop-filter: blur(10px); }
+  .chron-tab { border: 1px solid var(--line); background: var(--card); color: var(--muted); padding: 9px 14px; border-radius: 999px; }
+  .chron-tab:hover { border-color: var(--line2); color: var(--text); }
+  .chron-tab.on { background: var(--accent); border-color: var(--accent); color: #04101f; font-weight: 700; }
+  main { padding: 18px 0 60px; }
+  .chron-panel[hidden] { display: none; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 8px 0 16px; }
+  .chron-search { display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line); border-radius: 999px; padding: 8px 14px; min-width: min(520px, 100%); flex: 1 1 420px; }
+  .chron-search span { color: var(--dim); font-size: 13px; }
+  .chron-search input { width: 100%; background: transparent; border: 0; outline: none; color: var(--text); }
+  .chron-select { background: var(--card); border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 8px 10px; }
+  .chron-btn { background: var(--card); border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 8px 12px; }
+  .chron-btn:hover { border-color: var(--line2); }
+  .chron-count { color: var(--muted); font-size: 12px; margin-left: auto; }
+  .chron-day { margin: 26px 0 0; }
+  .chron-date { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; }
+  .chron-date .d { font-family: var(--mono); font-size: 14px; color: var(--text); }
+  .chron-date .w { color: var(--dim); font-size: 12px; }
+  .chron-date .ln { flex: 1; height: 1px; background: var(--line); }
+  .chron-date .sum { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .chron-hour { background: linear-gradient(180deg, var(--card), var(--bg2)); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 18px 14px; margin: 0 0 12px; }
+  .chron-hour:hover { border-color: var(--line2); }
+  .chron-h-title { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+  .chron-h-title .hh { font-family: var(--mono); color: var(--accent); font-size: 13px; }
+  .chron-h-title h3 { margin: 0; font-size: 17px; line-height: 1.35; flex: 1 1 360px; }
+  .chron-pill { border: 1px solid var(--line2); color: var(--muted); border-radius: 999px; padding: 2px 9px; font-size: 11px; white-space: nowrap; }
+  .chron-pill.inh { color: var(--warn); border-color: rgba(245,184,77,.45); }
+  .chron-v { border-radius: 999px; padding: 2px 9px; font-size: 11px; white-space: nowrap; border: 1px solid currentColor; }
+  .v-pos { color: var(--good); }
+  .v-neg { color: var(--bad); }
+  .v-mix { color: var(--warn); }
+  .v-none { color: var(--muted); }
+  .v-up { color: #8b93a7; }
+  .v-infra { color: var(--purple); }
+  .chron-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--dim); font-size: 12px; margin: 8px 0 12px; }
+  .chron-sec { margin: 10px 0; }
+  .chron-sec .k { color: var(--accent); font-size: 12px; letter-spacing: .04em; margin-bottom: 2px; }
+  .chron-sec .v { color: var(--text); white-space: pre-wrap; }
+  .chron-sec.result .v { color: #d9e6ff; }
+  .chron-ev { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+  .chron-ev .k { color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+  .chron-ev ul { margin: 0; padding-left: 16px; }
+  .chron-ev li { margin: 2px 0; font-family: var(--mono); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+  .chron-ev li.missing { color: var(--bad); }
+  .chron-ev .note { color: var(--dim); font-family: inherit; }
+  .chron-code { margin-top: 12px; border: 1px solid var(--line); border-radius: 10px; background: rgba(0,0,0,.12); }
+  .chron-code summary { cursor: pointer; padding: 9px 12px; color: var(--muted); font-size: 12px; }
+  .chron-code summary:hover { color: var(--text); }
+  .chron-codelist { border-top: 1px solid var(--line); }
+  .chron-crow { display: grid; grid-template-columns: minmax(180px, 1.4fr) 72px minmax(220px, 2.2fr) 80px 90px; gap: 10px; align-items: center; padding: 8px 12px; border-bottom: 1px solid rgba(34,48,74,.55); font-size: 12px; }
+  .chron-crow:last-child { border-bottom: 0; }
+  .chron-crow .nm { color: var(--text); font-family: var(--mono); overflow-wrap: anywhere; }
+  .chron-crow .tm { color: var(--dim); font-family: var(--mono); }
+  .chron-crow .dr { color: var(--muted); font-family: var(--mono); overflow-wrap: anywhere; }
+  .chron-crow .sz, .chron-crow .md { color: var(--dim); font-family: var(--mono); }
+  .copy-badge { display: inline-block; color: var(--warn); border: 1px solid rgba(245,184,77,.35); border-radius: 999px; padding: 0 6px; margin-left: 6px; font-size: 10px; }
+  .chron-copies { grid-column: 1 / -1; padding: 0 0 4px 0; color: var(--dim); font-family: var(--mono); font-size: 11px; }
+  .chron-copies div { overflow-wrap: anywhere; }
+  .empty-state { display: none; text-align: center; color: var(--muted); border: 1px dashed var(--line2); border-radius: var(--radius); padding: 40px 20px; margin: 20px 0; }
+  .chron-sec-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin: 8px 0 12px; }
+  .chron-sec-h h2 { margin: 0; font-size: 21px; }
+  .chron-sec-h .tag { color: var(--dim); font-size: 12px; }
+  .chron-concl { background: linear-gradient(135deg, rgba(90,169,255,.12), rgba(177,140,255,.08)); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; color: var(--muted); }
+  .chron-concl b { color: var(--text); }
+  .chron-phase-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin: 14px 0 24px; }
+  .chron-phase { background: var(--card); border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: var(--radius); padding: 16px; }
+  .chron-phase h3 { margin: 0 0 2px; font-size: 16px; }
+  .chron-phase .per { color: var(--dim); font-size: 12px; font-family: var(--mono); }
+  .chron-phase .summary { color: var(--muted); font-size: 13px; margin: 10px 0; }
+  .chron-phase .bullets { margin: 0; padding-left: 16px; color: var(--muted); font-size: 12px; }
+  .chron-phase .bullets li { margin: 2px 0; }
+  .chron-phase .kpis { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; color: var(--dim); font-size: 11px; }
+  .chron-heat-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); padding: 12px; margin: 12px 0 8px; }
+  .chron-heat { border-collapse: collapse; width: 100%; min-width: 900px; }
+  .chron-heat th, .chron-heat td { border: 1px solid rgba(34,48,74,.7); padding: 2px; text-align: center; font-family: var(--mono); font-size: 10px; }
+  .chron-heat th { color: var(--dim); font-weight: 500; }
+  .chron-heat th.rowh { text-align: left; padding-left: 6px; white-space: nowrap; color: var(--muted); }
+  .chron-heat td { height: 22px; min-width: 24px; color: var(--text); }
+  .chron-heat td.zero { color: transparent; }
+  .chron-legend { display: flex; align-items: center; gap: 8px; color: var(--dim); font-size: 11px; }
+  .chron-legend i { display: inline-block; width: 18px; height: 10px; border-radius: 2px; background: var(--accent); }
+  .chron-notes { display: grid; gap: 10px; margin: 14px 0; }
+  .chron-note { background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 10px; padding: 13px 16px; }
+  .chron-note h3 { margin: 0 0 4px; font-size: 14px; }
+  .chron-note p { margin: 0; color: var(--muted); font-size: 13px; }
+  .method-head { background: var(--card2); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; color: var(--muted); font-size: 12px; }
+  .method-head code { color: var(--text); overflow-wrap: anywhere; }
+  .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); margin-top: 12px; }
+  table.files { width: 100%; border-collapse: collapse; min-width: 980px; }
+  table.files th, table.files td { text-align: left; border-bottom: 1px solid rgba(34,48,74,.6); padding: 7px 10px; font-size: 12px; }
+  table.files th { color: var(--dim); font-weight: 500; position: sticky; top: 0; background: var(--card2); }
+  table.files td { color: var(--muted); font-family: var(--mono); overflow-wrap: anywhere; }
+  table.files td.path { color: var(--text); }
+  .file-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 12px 0 0; }
+  .file-toolbar input { background: var(--card); border: 1px solid var(--line); color: var(--text); border-radius: 10px; padding: 8px 12px; min-width: 280px; }
+  .footer { color: var(--dim); font-size: 11px; border-top: 1px solid var(--line); padding: 18px 0 40px; }
+  @media (max-width: 900px) {
+    .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .chron-crow { grid-template-columns: 1fr 60px; }
+    .chron-crow .dr, .chron-crow .sz, .chron-crow .md { display: none; }
+    .chron-count { margin-left: 0; }
+  }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">Birthtime Work Chronology</div>
+    <h1>__CHRONO_TITLE__</h1>
+    <p class="subtitle" id="subtitle"></p>
+    <div class="hero-meta">
+      <span>根目录 <code id="rootPath"></code></span>
+      <span>生成 <code id="generatedAt"></code></span>
+      <span>时区 <code id="timezone"></code></span>
+      <span>叙事分片 <code id="parts"></code></span>
+    </div>
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="tabs" aria-label="视图切换">
+    <button class="chron-tab on" data-tab="timeline">逐小时编年</button>
+    <button class="chron-tab" data-tab="phases">阶段总览</button>
+    <button class="chron-tab" data-tab="files" id="tabFilesBtn">文件全表</button>
+    <button class="chron-tab" data-tab="method">口径与更正</button>
+  </nav>
+</div>
+
+<main class="wrap">
+  <section class="chron-panel" id="tab-timeline">
+    <div class="toolbar">
+      <label class="chron-search">
+        <span>搜索</span>
+        <input id="q" type="search" autocomplete="off" placeholder="搜代码名、路径、问题、结果、数字、证据…">
+      </label>
+      <select class="chron-select" id="dateSel" aria-label="按日期筛选"></select>
+      <select class="chron-select" id="verdictSel" aria-label="按结论筛选"></select>
+      <button class="chron-btn" id="expandAll" type="button">展开全部代码</button>
+      <button class="chron-btn" id="collapseAll" type="button">折叠全部代码</button>
+      <span class="chron-count" id="visibleCount"></span>
+    </div>
+    <div id="timelineBody"></div>
+    <div class="empty-state" id="emptyState">没有匹配的小时。清空搜索或筛选条件后再试。</div>
+  </section>
+
+  <section class="chron-panel" id="tab-phases" hidden>
+    <div class="chron-sec-h"><h2>阶段总览</h2><span class="tag">按连续小时归并，不改变原始小时</span></div>
+    <div class="chron-concl" id="phaseConcl"></div>
+    <div class="chron-phase-grid" id="phaseGrid"></div>
+    <div class="chron-sec-h"><h2>每日 24 小时热力</h2><span class="tag">格子数字为该小时创建的文件数</span></div>
+    <div class="chron-heat-wrap"><table class="chron-heat" id="heatTable"></table></div>
+    <div class="chron-legend"><span>少</span><i style="opacity:.18"></i><i style="opacity:.38"></i><i style="opacity:.62"></i><i style="opacity:.9"></i><span>多</span></div>
+  </section>
+
+  <section class="chron-panel" id="tab-files" hidden>
+    <div class="chron-sec-h"><h2 id="filesHeading">全部文件</h2><span class="tag">每一行对应一个文件；同内容文件保留重复行</span></div>
+    <div class="file-toolbar">
+      <input id="fq" type="search" autocomplete="off" placeholder="过滤路径、文件名、扩展名、md5…">
+      <span class="chron-count" id="fcount"></span>
+    </div>
+    <div class="table-wrap">
+      <table class="files">
+        <thead><tr><th>创建时间</th><th>小时</th><th>路径</th><th>扩展名</th><th>大小</th><th>同内容副本</th><th>md5</th></tr></thead>
+        <tbody id="ftbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="chron-panel" id="tab-method" hidden>
+    <div class="chron-sec-h"><h2>口径与更正</h2><span class="tag">先读这一页再引用任何数字</span></div>
+    <div class="method-head" id="methodHead"></div>
+    <div class="chron-notes" id="noteList"></div>
+  </section>
+</main>
+
+<footer class="footer"><div class="wrap">本页为自包含静态文件，不加载外部脚本、样式或字体。所有时间来自文件 st_birthtime；证据路径需在源项目中真实存在。</div></footer>
+
+<script id="chron-data" type="application/json">__CHRONO_DATA__</script>
+<script>
+(function () {
+  "use strict";
+  var DATA = JSON.parse(document.getElementById("chron-data").textContent);
+  var $ = function (sel, root) { return (root || document).querySelector(sel); };
+  var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+  var esc = function (value) {
+    return String(value == null ? "" : value)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  };
+  var fmtBytes = function (n) {
+    if (!n) return "0 B";
+    var units = ["B", "KB", "MB", "GB", "TB"];
+    var i = 0;
+    while (n >= 1024 && i < units.length - 1) { n = n / 1024; i += 1; }
+    return (i === 0 ? n : n.toFixed(1)) + " " + units[i];
+  };
+  var phaseById = {};
+  DATA.phases.forEach(function (p) { phaseById[p.id] = p; });
+  var verdictLabel = DATA.verdictLabels || {};
+  var verdictClass = { pos: "v-pos", neg: "v-neg", mix: "v-mix", none: "v-none", up: "v-up", infra: "v-infra" };
+  var hayByHour = {};
+  DATA.hours.forEach(function (h) { hayByHour[h.hour] = (h.hay || "").toLowerCase(); });
+
+  function renderHeader() {
+    var scopeLabel = DATA.meta.scopeLabel || "项目文件";
+    var itemLabel = DATA.meta.itemLabel || "文件";
+    $("#subtitle").textContent = DATA.meta.subtitle || "";
+    $("#rootPath").textContent = DATA.meta.root || "";
+    $("#generatedAt").textContent = DATA.meta.generated_at || "";
+    $("#timezone").textContent = DATA.meta.timezone || "";
+    $("#parts").textContent = (DATA.meta.parts || []).join(", ") || "single file";
+    $("#tabFilesBtn").textContent = itemLabel + "全表";
+    $("#filesHeading").textContent = "全部" + scopeLabel;
+    $("#q").placeholder = "搜" + itemLabel + "名、路径、问题、结果、数字、证据…";
+    var items = [
+      ["小时", DATA.stats.hours],
+      [scopeLabel, DATA.stats.files],
+      ["全局唯一", DATA.stats.uniqueGlobal],
+      ["同内容副本", DATA.stats.copies],
+      ["日历日", DATA.stats.days],
+      ["阶段", DATA.stats.phases]
+    ];
+    $("#stats").innerHTML = items.map(function (x) {
+      return '<div class="stat"><b>' + esc(x[1]) + '</b><span>' + esc(x[0]) + '</span></div>';
+    }).join("");
+  }
+
+  function renderDay(day, hours) {
+    var itemLabel = DATA.meta.itemLabel || "文件";
+    var sum = hours.length + " 小时 · " + hours.reduce(function (a, h) { return a + h.n; }, 0) + " 个" + itemLabel;
+    var cards = hours.map(renderHour).join("");
+    return '<section class="chron-day" data-date="' + esc(day.date) + '">' +
+      '<div class="chron-date"><span class="d">' + esc(day.date) + '</span><span class="w">' + esc(day.weekday) + '</span><span class="ln"></span><span class="sum">' + esc(sum) + '</span></div>' +
+      '<div class="chron-hours">' + cards + '</div></section>';
+  }
+
+  function renderEvidence(narr) {
+    var list = (narr.e || []).map(function (ev) {
+      var label = ev.resolved + (ev.line ? ":" + ev.line : "");
+      var cls = ev.exists ? "" : "missing";
+      var note = ev.note ? ' <span class="note">(' + esc(ev.note) + ')</span>' : "";
+      return '<li class="' + cls + '">' + esc(label) + note + '</li>';
+    }).join("");
+    return '<div class="chron-ev"><div class="k">证据</div><ul>' + list + '</ul></div>';
+  }
+
+  function renderCode(hour) {
+    if (!hour.groups || !hour.groups.length) return "";
+    var rows = hour.groups.map(function (g) {
+      var copies = g.n > 1 ? '<span class="copy-badge">×' + g.n + '</span>' : "";
+      var paths = g.n > 1 ? '<div class="chron-copies">' + g.paths.map(function (p) { return '<div>└ ' + esc(p) + '</div>'; }).join("") + '</div>' : "";
+      return '<div class="chron-crow"><div class="nm">' + esc(g.name) + copies + '</div>' +
+        '<div class="tm">' + esc(g.t) + '</div>' +
+        '<div class="dr">' + esc(g.dir || ".") + '</div>' +
+        '<div class="sz">' + fmtBytes(g.size) + '</div>' +
+        '<div class="md">' + esc((g.md5 || "").slice(0, 8)) + '</div>' + paths + '</div>';
+    }).join("");
+    var itemLabel = DATA.meta.itemLabel || "文件";
+    return '<details class="chron-code"><summary>' + esc(itemLabel) + '明细 · ' + hour.n + ' 个' + esc(itemLabel) + ' / ' + hour.unique + ' 组（本小时去重）</summary><div class="chron-codelist">' + rows + '</div></details>';
+  }
+
+  function renderHour(hour) {
+    var narr = hour.narr;
+    var phase = phaseById[narr.p] || { name: narr.p, color: "#8b93a7" };
+    var cls = verdictClass[narr.v] || "v-none";
+    var label = verdictLabel[narr.v] || narr.v;
+    return '<article class="chron-hour" data-hour="' + esc(hour.hour) + '" data-date="' + esc(hour.date) + '" data-verdict="' + esc(narr.v) + '">' +
+      '<div class="chron-h-title"><span class="hh">' + esc(hour.hour.slice(11)) + '</span><h3>' + esc(narr.t) + '</h3>' +
+      '<span class="chron-pill" style="border-color:' + esc(phase.color) + '55">' + esc(phase.name) + '</span>' +
+      (narr.inherited ? '<span class="chron-pill inh">继承时间</span>' : '') +
+      '<span class="chron-v ' + cls + '">' + esc(label) + '</span></div>' +
+      '<div class="chron-meta"><span>' + hour.n + ' 个文件</span><span>' + hour.unique + ' 组（本小时去重）</span><span>' + esc(fmtBytes(hour.bytes)) + '</span>' +
+      '<span>' + hour.date + ' ' + esc(hour.weekday) + '</span></div>' +
+      '<div class="chron-sec"><div class="k">问题 / WHY</div><div class="v">' + esc(narr.q || "未记录") + '</div></div>' +
+      '<div class="chron-sec"><div class="k">做法 / HOW</div><div class="v">' + esc(narr.m || "未记录") + '</div></div>' +
+      '<div class="chron-sec result"><div class="k">结果 / RESULT</div><div class="v">' + esc(narr.r || "无结果记录") + '</div></div>' +
+      renderEvidence(narr) + renderCode(hour) + '</article>';
+  }
+
+  function renderTimeline() {
+    var byDate = {};
+    DATA.hours.forEach(function (h) { (byDate[h.date] = byDate[h.date] || []).push(h); });
+    $("#timelineBody").innerHTML = DATA.days.map(function (day) {
+      return renderDay(day, byDate[day.date] || []);
+    }).join("");
+  }
+
+  function renderPhases() {
+    var total = DATA.stats.files || 1;
+    $("#phaseConcl").innerHTML = '<b>' + DATA.phases.length + '</b> 个阶段，<b>' + DATA.stats.hours + '</b> 个小时，<b>' + DATA.stats.files + '</b> 个' + esc(DATA.meta.scopeLabel || "项目文件") + '。' +
+      '阶段只是阅读单位，不改变小时和文件的原始归属。';
+    $("#phaseGrid").innerHTML = DATA.phases.map(function (p) {
+      var bullets = (p.bullets || []).map(function (b) { return '<li>' + esc(b) + '</li>'; }).join("");
+      return '<article class="chron-phase" style="border-top-color:' + esc(p.color) + '">' +
+        '<h3>' + esc(p.name) + '</h3><div class="per">' + esc(p.start || "") + ' → ' + esc(p.end || "") + '</div>' +
+        '<div class="summary">' + esc(p.summary || "") + '</div>' +
+        (bullets ? '<ul class="bullets">' + bullets + '</ul>' : "") +
+        '<div class="kpis"><span>' + p.hours + ' 小时</span><span>' + p.files + ' 文件</span><span>' +
+        Math.round((p.files / total) * 100) + '% 文件</span><span>负面 ' + p.neg + '</span><span>无结果 ' + p.none + '</span></div></article>';
+    }).join("");
+    var max = 1;
+    DATA.heat.matrix.forEach(function (row) { row.forEach(function (n) { if (n > max) max = n; }); });
+    var head = '<thead><tr><th class="rowh">日期</th>';
+    for (var i = 0; i < 24; i += 1) head += '<th>' + (i < 10 ? "0" + i : i) + '</th>';
+    head += '</tr></thead>';
+    var body = DATA.heat.dates.map(function (date, di) {
+      var day = DATA.days[di] || {};
+      var row = '<tr><th class="rowh">' + esc(date) + ' ' + esc(day.weekday || "") + '</th>';
+      DATA.heat.matrix[di].forEach(function (n, hour) {
+        var alpha = n ? (0.15 + Math.min(0.75, (n / max) * 0.75)) : 0;
+        var cls = n ? "" : "zero";
+        row += '<td class="' + cls + '" title="' + esc(date) + " " + (hour < 10 ? "0" + hour : hour) + ':00 · ' + n + ' 个文件" style="background:rgba(90,169,255,' + alpha.toFixed(3) + ')">' + (n || "") + '</td>';
+      });
+      return row + '</tr>';
+    }).join("");
+    $("#heatTable").innerHTML = head + '<tbody>' + body + '</tbody>';
+  }
+
+  function renderFiles() {
+    $("#ftbody").innerHTML = DATA.codeFiles.map(function (f) {
+      var copy = f.copies > 0 ? '<span class="copy-badge">×' + (f.copies + 1) + '</span>' : "";
+      var hay = [f.path, f.ext, f.hour, f.md5].join(" ").toLowerCase();
+      return '<tr class="file-row" data-hay="' + esc(hay) + '"><td>' + esc(f.dt) + '</td><td>' + esc(f.hour) + '</td>' +
+        '<td class="path">' + esc(f.path) + '</td><td>' + esc(f.ext) + '</td><td>' + esc(fmtBytes(f.size)) + '</td>' +
+        '<td>' + copy + '</td><td>' + esc((f.md5 || "").slice(0, 12)) + '</td></tr>';
+    }).join("");
+    updateFileCount();
+  }
+
+  function renderNotes() {
+    var notes = DATA.meta.notes || [];
+    $("#methodHead").innerHTML = '根目录 <code>' + esc(DATA.meta.root) + '</code><br>生成时间 <code>' + esc(DATA.meta.generated_at) + '</code> · 时区 <code>' + esc(DATA.meta.timezone) + '</code><br>叙事分片 <code>' + esc((DATA.meta.parts || []).join(", ") || "single file") + '</code>';
+    $("#noteList").innerHTML = notes.map(function (n) {
+      return '<div class="chron-note"><h3>' + esc(n.h || "说明") + '</h3><p>' + esc(n.p || "") + '</p></div>';
+    }).join("");
+  }
+
+  function applyFilters() {
+    var term = ($("#q").value || "").trim().toLowerCase();
+    var date = $("#dateSel").value;
+    var verdict = $("#verdictSel").value;
+    var visible = 0;
+    $$(".chron-hour").forEach(function (el) {
+      var hay = hayByHour[el.dataset.hour] || "";
+      var show = (!term || hay.indexOf(term) !== -1) && (!date || el.dataset.date === date) && (!verdict || el.dataset.verdict === verdict);
+      el.style.display = show ? "" : "none";
+      if (show) visible += 1;
+    });
+    $$(".chron-day").forEach(function (day) {
+      var any = $$(".chron-hour", day).some(function (el) { return el.style.display !== "none"; });
+      day.style.display = any ? "" : "none";
+    });
+    $("#visibleCount").textContent = visible + " / " + DATA.stats.hours + " 小时";
+    $("#emptyState").style.display = visible ? "none" : "block";
+  }
+
+  function updateFileCount() {
+    var vis = $$("#ftbody tr").filter(function (row) { return row.style.display !== "none"; }).length;
+    $("#fcount").textContent = vis + " / " + DATA.stats.files + " 个文件";
+  }
+
+  function setupFilters() {
+    var dateSel = $("#dateSel");
+    dateSel.innerHTML = '<option value="">全部日期</option>' + DATA.days.map(function (d) {
+      return '<option value="' + esc(d.date) + '">' + esc(d.date) + ' · ' + d.hours + ' 小时 · ' + d.files + ' 文件</option>';
+    }).join("");
+    var verdictSel = $("#verdictSel");
+    var counts = {};
+    DATA.hours.forEach(function (h) { counts[h.narr.v] = (counts[h.narr.v] || 0) + 1; });
+    verdictSel.innerHTML = '<option value="">全部结论</option>' + Object.keys(verdictLabel).map(function (v) {
+      return '<option value="' + esc(v) + '">' + esc(verdictLabel[v]) + " · " + (counts[v] || 0) + '</option>';
+    }).join("");
+    $("#q").addEventListener("input", applyFilters);
+    dateSel.addEventListener("change", applyFilters);
+    verdictSel.addEventListener("change", applyFilters);
+    $("#expandAll").addEventListener("click", function () {
+      $$(".chron-hour .chron-code").forEach(function (d) { d.open = true; });
+    });
+    $("#collapseAll").addEventListener("click", function () {
+      $$(".chron-hour .chron-code").forEach(function (d) { d.open = false; });
+    });
+    $("#fq").addEventListener("input", function () {
+      var term = this.value.trim().toLowerCase();
+      $$("#ftbody tr").forEach(function (row) {
+        row.style.display = (!term || (row.dataset.hay || "").indexOf(term) !== -1) ? "" : "none";
+      });
+      updateFileCount();
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "SELECT") {
+        event.preventDefault();
+        $("#q").focus();
+      }
+      if (event.key === "Escape") {
+        $("#q").value = "";
+        $("#q").dispatchEvent(new Event("input", { bubbles: true }));
+      }
+    });
+  }
+
+  function setupTabs() {
+    $$(".chron-tab").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        $$(".chron-tab").forEach(function (b) { b.classList.toggle("on", b === btn); });
+        $$(".chron-panel").forEach(function (p) { p.hidden = p.id !== "tab-" + btn.dataset.tab; });
+      });
+    });
+  }
+
+  renderHeader();
+  renderTimeline();
+  renderPhases();
+  renderFiles();
+  renderNotes();
+  setupTabs();
+  setupFilters();
+  applyFilters();
+})();
+</script>
+</body>
+</html>
