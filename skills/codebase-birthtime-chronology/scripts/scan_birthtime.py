@@ -402,6 +402,14 @@ def scan(args: argparse.Namespace) -> dict:
         summary["warnings"].append(
             "已禁用 md5；同一小时只能按路径分组，copies 为 0。最终交付建议启用 md5。"
         )
+    if md5_failures:
+        summary["warnings"].append(
+            f"{md5_failures} 个文件无法计算 md5，已按路径分组；副本统计可能偏高。"
+        )
+    if skipped_files:
+        summary["warnings"].append(
+            f"{len(skipped_files)} 个文件被跳过（符号链接或读取错误），详见 skippedFiles。"
+        )
     (out_dir / "scan_summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8"
     )

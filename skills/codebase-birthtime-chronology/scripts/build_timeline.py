@@ -242,7 +242,16 @@ class EvidenceResolver:
         ]
         for key in candidates:
             if key in self.fix_map:
-                rel = self._relative(self.fix_map[key])
+                try:
+                    rel = self._relative(self.fix_map[key])
+                except ValueError as exc:
+                    return {
+                        "raw": str(self.fix_map[key]),
+                        "resolved": str(self.fix_map[key]),
+                        "exists": False,
+                        "line": line,
+                        "note": f"fix-map 无效：{exc}",
+                    }
                 notes.append("fix-map")
                 break
 
